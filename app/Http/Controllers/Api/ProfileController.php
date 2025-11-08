@@ -81,6 +81,18 @@ class ProfileController extends Controller
         $admin = $request->user();
         $data = $request->validated();
 
+        if (!app()->environment('production')) {
+            $admin->forceFill([
+                'password' => Hash::make($data['password']),
+            ])->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'رمز عبور بدون نیاز به تایید بروزرسانی شد.',
+                'requires_verification' => false,
+            ]);
+        }
+
         $pendingPasswordKey = $this->getPendingPasswordCacheKey($admin->id);
         $hashedPassword = Hash::make($data['password']);
 
@@ -100,6 +112,7 @@ class ProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'کد تایید برای شما ارسال شد.',
+            'requires_verification' => true,
         ]);
     }
 
@@ -108,6 +121,13 @@ class ProfileController extends Controller
      */
     public function verifyPasswordChange(VerifyPasswordChangeRequest $request): JsonResponse
     {
+        if (!app()->environment('production')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'تغییر رمز عبور در محیط غیر پروداکشن نیاز به تایید ندارد.',
+            ]);
+        }
+
         $admin = $request->user();
         $pendingPasswordKey = $this->getPendingPasswordCacheKey($admin->id);
         $pendingPassword = Cache::get($pendingPasswordKey);

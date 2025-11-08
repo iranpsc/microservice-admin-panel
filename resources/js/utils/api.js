@@ -1,8 +1,5 @@
 import axios from 'axios'
 
-// Get CSRF token
-const token = document.head.querySelector('meta[name="csrf-token"]')
-
 // Create axios instance with default config for API routes
 const apiClient = axios.create({
   baseURL: '/api',
@@ -14,14 +11,48 @@ const apiClient = axios.create({
   withCredentials: true
 })
 
-// Add CSRF token to requests
-if (token) {
-  apiClient.defaults.headers.common['X-CSRF-TOKEN'] = token.content
+const stateChangingMethods = ['post', 'put', 'patch', 'delete']
+let csrfCookiePromise = null
+
+const getCookie = (name) => {
+  const value = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(`${name}=`))
+  return value ? decodeURIComponent(value.split('=')[1]) : null
+}
+
+const ensureCsrfCookie = async (force = false) => {
+  if (!csrfCookiePromise || force) {
+    csrfCookiePromise = axios
+      .get('/sanctum/csrf-cookie', {
+        withCredentials: true,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .catch((error) => {
+        csrfCookiePromise = null
+        throw error
+      })
+  }
+  await csrfCookiePromise
 }
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    const method = config.method?.toLowerCase()
+    if (stateChangingMethods.includes(method)) {
+      const hasXsrfToken = !!getCookie('XSRF-TOKEN')
+      if (!hasXsrfToken) {
+        await ensureCsrfCookie()
+      }
+      const token = getCookie('XSRF-TOKEN')
+      if (token) {
+        config.headers['X-XSRF-TOKEN'] = token
+      }
+    }
+
     // Add auth token if available
     const authToken = localStorage.getItem('admin_token')
     if (authToken) {
@@ -52,6 +83,20 @@ apiClient.interceptors.response.use(
           window.location.href = '/login'
           return Promise.reject(error)
         }
+      }
+
+      // Handle CSRF token mismatch
+      if (error.response.status === 419 && !error.config._retry) {
+        error.config._retry = true
+        return ensureCsrfCookie(true)
+          .then(() => {
+            const token = getCookie('XSRF-TOKEN')
+            if (token) {
+              error.config.headers['X-XSRF-TOKEN'] = token
+            }
+            return apiClient.request(error.config)
+          })
+          .catch(() => Promise.reject(error))
       }
 
       // Handle 403 Forbidden

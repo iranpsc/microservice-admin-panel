@@ -209,7 +209,7 @@
                     :loading="isRequestingPassword"
                     class="self-start"
                   >
-                    ارسال کد تایید
+                    {{ isProduction ? 'ارسال کد تایید' : 'ثبت تغییر رمز عبور' }}
                   </Button>
                 </div>
               </div>
@@ -269,6 +269,14 @@ const tabs = [
 const activeTab = ref('info')
 const { user, refreshUser } = useAuth()
 const { showToast } = useToast()
+
+const appEnvMeta = document.querySelector('meta[name="app-env"]')?.getAttribute('content') || ''
+const isProduction = computed(() => {
+  if (appEnvMeta) {
+    return appEnvMeta === 'production'
+  }
+  return import.meta.env.MODE === 'production'
+})
 
 const currentUser = computed(() => user.value || {})
 const userRoles = computed(() => currentUser.value?.roles || [])
@@ -475,8 +483,21 @@ const handlePasswordSubmit = async () => {
   const result = await requestPasswordChange()
 
   if (result.success) {
-    showToast(result.data?.message || 'کد تایید برای شما ارسال شد.', 'success')
-    await openVerificationModal()
+    const requiresVerification = result.data?.requires_verification !== false
+    showToast(
+      result.data?.message ||
+        (requiresVerification ? 'کد تایید برای شما ارسال شد.' : 'رمز عبور با موفقیت بروزرسانی شد.'),
+      'success'
+    )
+
+    if (requiresVerification) {
+      await openVerificationModal()
+    } else {
+      passwordForm.current_password = ''
+      passwordForm.password = ''
+      passwordForm.password_confirmation = ''
+      await refreshUser()
+    }
   } else {
     showToast(result.message, 'error')
   }
