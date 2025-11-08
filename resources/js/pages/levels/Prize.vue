@@ -177,7 +177,7 @@ import { reactive, ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import apiClient from '../../utils/api'
 import { Button, Card, Input, Alert, Modal, LoadingState, ErrorState } from '../../components/ui'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyWarning, notifyError } from '../../utils/notifications'
 
 const route = useRoute()

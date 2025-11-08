@@ -294,7 +294,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import apiClient from '../../utils/api'
 import { Table, Pagination, Button, Badge, LoadingState, ErrorState, Modal, Input } from '../../components/ui'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
 
 const loading = ref(true)

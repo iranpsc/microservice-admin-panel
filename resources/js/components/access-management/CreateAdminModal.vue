@@ -102,7 +102,7 @@
 import { ref, watch, computed, nextTick } from 'vue'
 import apiClient from '../../utils/api'
 import { Modal, Select, Button, Spinner, Alert } from '../ui'
-import VerificationForm from '../citizens/VerificationForm.vue'
+import VerificationForm from '../VerificationForm.vue'
 import { notifySuccess, notifyError } from '../../utils/notifications'
 
 const props = defineProps({

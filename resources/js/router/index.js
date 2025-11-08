@@ -55,6 +55,7 @@ import NotFound from '../components/errors/NotFound.vue'
 import { navigationProgress } from '../composables/useNavigationProgress'
 import { useAuth } from '../composables/useAuth'
 import IsicCodes from '../pages/isic-codes/Listing.vue'
+import Profile from '../pages/profile/Profile.vue'
 
 const routes = [
   {
@@ -101,6 +102,14 @@ const routes = [
         component: Dashboard,
         meta: {
           title: 'داشبورد'
+        }
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: Profile,
+        meta: {
+          title: 'پروفایل من'
         }
       },
       {

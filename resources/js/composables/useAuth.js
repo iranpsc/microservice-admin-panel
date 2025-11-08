@@ -27,6 +27,20 @@ let checkAuthPromise = null
  * Authentication composable for managing admin authentication state
  */
 export function useAuth() {
+  const setUserData = (userData) => {
+    if (userData) {
+      user.value = userData
+      isAuthenticated.value = true
+      localStorage.setItem('admin_authenticated', 'true')
+      localStorage.setItem('admin_user_data', JSON.stringify(userData))
+    } else {
+      user.value = null
+      isAuthenticated.value = false
+      localStorage.removeItem('admin_authenticated')
+      localStorage.removeItem('admin_user_data')
+    }
+  }
+
   /**
    * Login user
    */
@@ -48,9 +62,7 @@ export function useAuth() {
         try {
           const userResponse = await authApi.getAuthUser()
           if (userResponse.success && userResponse.data) {
-            const userData = userResponse.data
-            user.value = userData
-            localStorage.setItem('admin_user_data', JSON.stringify(userData))
+            setUserData(userResponse.data)
           }
         } catch (userError) {
           // Token is valid but /me failed, still consider login successful
@@ -64,12 +76,9 @@ export function useAuth() {
       
       throw new Error(loginResponse.message || 'خطا در ورود به سیستم')
     } catch (error) {
-      isAuthenticated.value = false
-      user.value = null
-      localStorage.removeItem('admin_authenticated')
+      setUserData(null)
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_token_expires_at')
-      localStorage.removeItem('admin_user_data')
       
       // Format error for display
       if (error.errors) {
@@ -94,21 +103,15 @@ export function useAuth() {
     isLoading.value = true
     try {
       await authApi.logout()
-      user.value = null
-      isAuthenticated.value = false
-      localStorage.removeItem('admin_authenticated')
+      setUserData(null)
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_token_expires_at')
-      localStorage.removeItem('admin_user_data')
       return { success: true }
     } catch (error) {
       // Even if logout fails, clear local state
-      user.value = null
-      isAuthenticated.value = false
-      localStorage.removeItem('admin_authenticated')
+      setUserData(null)
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_token_expires_at')
-      localStorage.removeItem('admin_user_data')
       return { success: false, error: error.message || 'خطا در خروج از سیستم' }
     } finally {
       isLoading.value = false
@@ -138,12 +141,9 @@ export function useAuth() {
     // Check if token exists and is not expired
     const token = localStorage.getItem('admin_token')
     if (!token || isTokenExpired()) {
-      user.value = null
-      isAuthenticated.value = false
-      localStorage.removeItem('admin_authenticated')
+      setUserData(null)
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_token_expires_at')
-      localStorage.removeItem('admin_user_data')
       return { success: false, authenticated: false }
     }
 
@@ -160,31 +160,21 @@ export function useAuth() {
           // Token remains the same from localStorage
           const userData = response.data
           
-          user.value = userData
-          isAuthenticated.value = true
-          localStorage.setItem('admin_authenticated', 'true')
-          // Keep existing token - don't overwrite it
-          localStorage.setItem('admin_user_data', JSON.stringify(userData))
+          setUserData(userData)
           return { success: true, authenticated: true }
         }
         
         // Invalid response structure - not authenticated
-        user.value = null
-        isAuthenticated.value = false
-        localStorage.removeItem('admin_authenticated')
+        setUserData(null)
         localStorage.removeItem('admin_token')
         localStorage.removeItem('admin_token_expires_at')
-        localStorage.removeItem('admin_user_data')
         return { success: false, authenticated: false }
       } catch (error) {
         // Check if it's a 401/403 error (unauthorized)
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          user.value = null
-          isAuthenticated.value = false
-          localStorage.removeItem('admin_authenticated')
+          setUserData(null)
           localStorage.removeItem('admin_token')
           localStorage.removeItem('admin_token_expires_at')
-          localStorage.removeItem('admin_user_data')
           return { success: false, authenticated: false }
         }
         
@@ -223,12 +213,30 @@ export function useAuth() {
       })
     } else if (!stored || !token || isTokenExpired()) {
       // Only clear if definitely invalid (no token or expired)
-      isAuthenticated.value = false
-      user.value = null
-      localStorage.removeItem('admin_authenticated')
+      setUserData(null)
       localStorage.removeItem('admin_token')
       localStorage.removeItem('admin_token_expires_at')
-      localStorage.removeItem('admin_user_data')
+    }
+  }
+
+  /**
+   * Refresh authenticated user data from API
+   */
+  const refreshUser = async () => {
+    try {
+      const response = await authApi.getAuthUser()
+      if (response && response.success && response.data) {
+        setUserData(response.data)
+        return { success: true, data: response.data }
+      }
+
+      return {
+        success: false,
+        error: response?.message || 'امکان بروزرسانی اطلاعات کاربر وجود ندارد'
+      }
+    } catch (error) {
+      const message = error?.message || error?.error || 'خطای غیرمنتظره‌ای رخ داده است'
+      return { success: false, error: message }
     }
   }
 
@@ -242,7 +250,9 @@ export function useAuth() {
     login,
     logout,
     checkAuth,
-    init
+    init,
+    refreshUser,
+    setUser: setUserData
   }
 }
 

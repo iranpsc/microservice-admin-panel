@@ -481,7 +481,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '../../utils/api'
 import { Table, Pagination, Button, Modal, Input, Alert, LoadingState, ErrorState, FileInput } from '../../components/ui'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
 import { usePageTitle } from '../../composables/usePageTitle'
 

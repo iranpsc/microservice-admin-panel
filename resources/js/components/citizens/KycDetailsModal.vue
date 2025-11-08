@@ -246,7 +246,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import apiClient from '../../utils/api'
 import { Modal, Button, Spinner, Alert } from '../ui'
 import ErrorInputField from './ErrorInputField.vue'
-import VerificationForm from './VerificationForm.vue'
+import VerificationForm from '../VerificationForm.vue'
 import { notifySuccess, notifyError } from '../../utils/notifications'
 
 const props = defineProps({

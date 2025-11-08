@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\OptionsController;
 use App\Http\Controllers\Api\PermissionsController;
 use App\Http\Controllers\Api\PricesController;
 use App\Http\Controllers\Api\PricingController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProfileDetailsController;
 use App\Http\Controllers\Api\RegistrationInfoController;
 use App\Http\Controllers\Api\ReportController;
@@ -134,6 +135,12 @@ Route::middleware(['auth:sanctum', EnsureAdminSanctumAuth::class])->group(functi
 
     // Profile Details routes
     Route::get('/profile-details', [ProfileDetailsController::class, 'index']);
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile/info', [ProfileController::class, 'updateInfo']);
+    Route::post('/profile/password/request', [ProfileController::class, 'requestPasswordChange']);
+    Route::post('/profile/password/verify', [ProfileController::class, 'verifyPasswordChange']);
 
     // Withdraws routes
     Route::get('/withdraws', [WithdrawController::class, 'index']);

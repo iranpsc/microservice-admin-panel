@@ -140,13 +140,6 @@
             >
               تنظیمات پروفایل
             </router-link>
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-glass)] hover:text-primary-400 transition-colors"
-              @click.prevent="showUserMenu = false"
-            >
-              ترجیحات
-            </a>
             <hr class="my-2 border-[var(--theme-border)]" />
             <button
               @click="handleLogout"

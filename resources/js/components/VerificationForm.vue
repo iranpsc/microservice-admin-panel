@@ -21,7 +21,7 @@
             :error="verificationErrors.phone_verification"
             :show-toggle="true"
             :auto-reveal-on-focus="true"
-            @submit="handleAutoSubmit"
+            @complete="handleAutoSubmit"
           />
 
           <!-- Timer Display (shown when countdown > 0) - directly beneath input -->
@@ -53,9 +53,9 @@
 
 <script setup>
 import { ref, watch, onUnmounted, onMounted, nextTick } from 'vue'
-import apiClient from '../../utils/api'
-import { MaskedInput, Alert, Spinner } from '../ui'
-import { notifyError } from '../../utils/notifications'
+import apiClient from '../utils/api'
+import { MaskedInput, Alert, Spinner } from './ui'
+import { notifyError } from '../utils/notifications'
 
 const props = defineProps({
   autoStart: {
@@ -120,7 +120,6 @@ const sendSMS = async () => {
 const validate = async () => {
   verificationErrors.value = {}
 
-  // Check Laravel's APP_ENV from meta tag, fallback to Vite mode
   const metaEnv = document.querySelector('meta[name="app-env"]')?.getAttribute('content')
   const isProduction = metaEnv === 'production' || import.meta.env.MODE === 'production'
 
@@ -131,14 +130,15 @@ const validate = async () => {
     }
   }
 
-  emit('verified', getData())
+  emit('verified', getData(isProduction))
   return true
 }
 
-const getData = () => {
-  // Check Laravel's APP_ENV from meta tag, fallback to Vite mode
-  const metaEnv = document.querySelector('meta[name="app-env"]')?.getAttribute('content')
-  const isProduction = metaEnv === 'production' || import.meta.env.MODE === 'production'
+const getData = (isProduction = null) => {
+  if (isProduction === null) {
+    const metaEnv = document.querySelector('meta[name="app-env"]')?.getAttribute('content')
+    isProduction = metaEnv === 'production' || import.meta.env.MODE === 'production'
+  }
 
   return {
     phone_verification: isProduction ? phoneVerification.value : null

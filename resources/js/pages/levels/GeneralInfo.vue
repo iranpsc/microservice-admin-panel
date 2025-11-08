@@ -325,7 +325,7 @@ import { useRoute, useRouter } from 'vue-router'
 import apiClient from '../../utils/api'
 import { Button, Card, Checkbox, Input, Modal, LoadingState, ErrorState, FileInput } from '../../components/ui'
 import Editor from 'primevue/editor'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyWarning, notifyError } from '../../utils/notifications'
 
 const ExistingFileHint = {

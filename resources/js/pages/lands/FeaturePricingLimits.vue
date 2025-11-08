@@ -113,7 +113,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import apiClient from '../../utils/api'
 import { Modal, Input, Button, Alert, LoadingState, ErrorState } from '../../components/ui'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyError } from '../../utils/notifications'
 
 const loading = ref(true)

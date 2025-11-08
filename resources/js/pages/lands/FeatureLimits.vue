@@ -352,7 +352,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import apiClient from '../../utils/api'
 import { Table, Pagination, Button, LoadingState, ErrorState, Alert, Modal, Input, Badge } from '../../components/ui'
 import PersianDatePicker from '../../components/ui/PersianDatePicker.vue'
-import VerificationForm from '../../components/citizens/VerificationForm.vue'
+import VerificationForm from '../../components/VerificationForm.vue'
 import { notifySuccess, notifyError } from '../../utils/notifications'
 import { gregorianToShamsiSync } from '../../utils/dateConverter'
 
