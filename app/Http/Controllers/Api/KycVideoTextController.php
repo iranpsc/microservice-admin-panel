@@ -7,8 +7,6 @@ use App\Http\Resources\KycVideoTextResource;
 use App\Models\KycVerifyText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class KycVideoTextController extends Controller
 {
@@ -50,17 +48,7 @@ class KycVideoTextController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'text' => 'required|string',
-            'phone_verification' => [
-                'nullable',
-                Rule::requiredIf(app()->environment('production')),
-                'is_valid_verify_code'
-            ],
-            'access_password' => [
-                'nullable',
-                Rule::requiredIf(app()->environment('production')),
-                'is_valid_access_password'
-            ],
+            'text' => 'required|string'
         ]);
 
         $text = KycVerifyText::create([
@@ -85,16 +73,6 @@ class KycVideoTextController extends Controller
     {
         $validated = $request->validate([
             'text' => 'required|string',
-            'phone_verification' => [
-                'nullable',
-                Rule::requiredIf(app()->environment('production')),
-                'is_valid_verify_code'
-            ],
-            'access_password' => [
-                'nullable',
-                Rule::requiredIf(app()->environment('production')),
-                'is_valid_access_password'
-            ],
         ]);
 
         $text = KycVerifyText::findOrFail($id);
