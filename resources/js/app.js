@@ -4,6 +4,8 @@ import router from './router';
 import axios from 'axios';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
+import 'select2/dist/css/select2.min.css';
+import 'simple-line-icons/css/simple-line-icons.css';
 
 // Set up axios defaults for Laravel
 window.axios = axios;

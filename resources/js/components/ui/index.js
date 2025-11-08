@@ -19,4 +19,6 @@ export { default as Checkbox } from './Checkbox.vue'
 export { default as FileInput } from './FileInput.vue'
 export { default as RichTextEditor } from './RichTextEditor.vue'
 export { default as TimePicker } from './TimePicker.vue'
+export { default as Textarea } from './Textarea.vue'
+export { default as Select2 } from './Select2.vue'
 

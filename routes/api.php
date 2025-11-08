@@ -45,6 +45,10 @@ use App\Http\Controllers\Api\VerificationController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\WithdrawController;
 use App\Http\Controllers\Api\VersionController;
+use App\Http\Controllers\Api\V1\Translations\FieldController as TranslationFieldController;
+use App\Http\Controllers\Api\V1\Translations\ModalController as TranslationModalController;
+use App\Http\Controllers\Api\V1\Translations\TabController as TranslationTabController;
+use App\Http\Controllers\Api\V1\Translations\TranslationController;
 use App\Http\Middleware\EnsureAdminSanctumAuth;
 use App\Models\KycVerifyText;
 use Illuminate\Support\Facades\Route;
@@ -264,5 +268,32 @@ Route::middleware(['auth:sanctum', EnsureAdminSanctumAuth::class])->group(functi
     Route::put('/maps/{id}', [MapsController::class, 'update']);
     Route::delete('/maps/{id}', [MapsController::class, 'destroy']);
     Route::post('/maps/{id}/insert-into-database', [MapsController::class, 'insertIntoDatabase']);
+
+    Route::prefix('v1')->group(function () {
+        Route::get('/translations/languages', [TranslationController::class, 'languages']);
+        Route::get('/translations', [TranslationController::class, 'index']);
+        Route::get('/translations/{translation}', [TranslationController::class, 'show']);
+        Route::post('/translations', [TranslationController::class, 'store']);
+        Route::delete('/translations/{translation}', [TranslationController::class, 'destroy']);
+        Route::patch('/translations/{translation}/status', [TranslationController::class, 'toggleStatus']);
+        Route::post('/translations/{translation}/export', [TranslationController::class, 'export']);
+
+        Route::get('/translations/{translation}/modals', [TranslationModalController::class, 'index']);
+        Route::get('/translations/{translation}/modals/{modal}', [TranslationModalController::class, 'show']);
+        Route::post('/translations/{translation}/modals', [TranslationModalController::class, 'store']);
+        Route::patch('/translations/{translation}/modals/{modal}', [TranslationModalController::class, 'update']);
+        Route::delete('/translations/{translation}/modals/{modal}', [TranslationModalController::class, 'destroy']);
+
+        Route::get('/translations/{translation}/modals/{modal}/tabs', [TranslationTabController::class, 'index']);
+        Route::get('/translations/{translation}/modals/{modal}/tabs/{tab}', [TranslationTabController::class, 'show']);
+        Route::post('/translations/{translation}/modals/{modal}/tabs', [TranslationTabController::class, 'store']);
+        Route::patch('/translations/{translation}/modals/{modal}/tabs/{tab}', [TranslationTabController::class, 'update']);
+        Route::delete('/translations/{translation}/modals/{modal}/tabs/{tab}', [TranslationTabController::class, 'destroy']);
+
+        Route::get('/translations/{translation}/modals/{modal}/tabs/{tab}/fields', [TranslationFieldController::class, 'index']);
+        Route::post('/translations/{translation}/modals/{modal}/tabs/{tab}/fields', [TranslationFieldController::class, 'store']);
+        Route::patch('/translations/{translation}/modals/{modal}/tabs/{tab}/fields/{field}', [TranslationFieldController::class, 'update']);
+        Route::delete('/translations/{translation}/modals/{modal}/tabs/{tab}/fields/{field}', [TranslationFieldController::class, 'destroy']);
+    });
 });
 

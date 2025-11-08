@@ -12,7 +12,6 @@
     <!-- BEGIN CSS -->
     <link href="{{ asset('assets/plugins/bootstrap/bootstrap5/css/bootstrap.rtl.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/metisMenu/dist/metisMenu.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/plugins/simple-line-icons/css/simple-line-icons.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css') }}"
         rel="stylesheet">

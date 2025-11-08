@@ -47,6 +47,10 @@ import DynastyPermissions from '../pages/dynasty/DynastyPermissions.vue'
 import DynastyPrizes from '../pages/dynasty/DynastyPrizes.vue'
 import MapsListing from '../pages/maps/MapsListing.vue'
 import ReportsListing from '../pages/reports/Listing.vue'
+import TranslationsIndex from '../pages/translations/TranslationsIndex.vue'
+import TranslationModals from '../pages/translations/TranslationModals.vue'
+import ModalTabs from '../pages/translations/ModalTabs.vue'
+import TabFields from '../pages/translations/TabFields.vue'
 import NotFound from '../components/errors/NotFound.vue'
 import { navigationProgress } from '../composables/useNavigationProgress'
 import { useAuth } from '../composables/useAuth'
@@ -440,6 +444,41 @@ const routes = [
         component: MapsListing,
         meta: {
           title: 'لیست نقشه ها'
+        }
+      },
+      {
+        path: 'translations',
+        name: 'translations-index',
+        component: TranslationsIndex,
+        meta: {
+          title: 'مدیریت ترجمه‌ها'
+        }
+      },
+      {
+        path: 'translations/:translationId/modals',
+        name: 'translations-modals',
+        component: TranslationModals,
+        props: true,
+        meta: {
+          title: 'مدیریت بخش‌های ترجمه'
+        }
+      },
+      {
+        path: 'translations/:translationId/modals/:modalId/tabs',
+        name: 'translations-tabs',
+        component: ModalTabs,
+        props: true,
+        meta: {
+          title: 'مدیریت تب‌های ترجمه'
+        }
+      },
+      {
+        path: 'translations/:translationId/modals/:modalId/tabs/:tabId/fields',
+        name: 'translations-fields',
+        component: TabFields,
+        props: true,
+        meta: {
+          title: 'عبارات ترجمه'
         }
       }
     ]
