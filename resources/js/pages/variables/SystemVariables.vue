@@ -262,7 +262,10 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import apiClient from '../../utils/api'
 import { Button, ErrorState, Input, LoadingState, Modal, Pagination, SearchBox, Table } from '../../components/ui'
-import { notifyError, notifySuccess, confirm } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -568,7 +571,7 @@ const submitCreate = async () => {
     const response = await apiClient.post('/system-variables', payload)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'متغیر با موفقیت ثبت شد')
+      showToast(response.data.message || 'متغیر با موفقیت ثبت شد', 'success')
       closeCreateModal()
       fetchVariables()
     }
@@ -580,7 +583,7 @@ const submitCreate = async () => {
       return
     }
 
-    await notifyError(err.response?.data?.message || 'خطا در ثبت متغیر')
+    showToast(err.response?.data?.message || 'خطا در ثبت متغیر', 'error')
   } finally {
     submittingCreate.value = false
   }
@@ -605,7 +608,7 @@ const submitEdit = async () => {
     const response = await apiClient.put(`/system-variables/${editForm.id}`, payload)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'متغیر با موفقیت بروزرسانی شد')
+      showToast(response.data.message || 'متغیر با موفقیت بروزرسانی شد', 'success')
       closeEditModal()
       fetchVariables()
     }
@@ -617,7 +620,7 @@ const submitEdit = async () => {
       return
     }
 
-    await notifyError(err.response?.data?.message || 'خطا در بروزرسانی متغیر')
+    showToast(err.response?.data?.message || 'خطا در بروزرسانی متغیر', 'error')
   } finally {
     submittingEdit.value = false
   }
@@ -639,12 +642,12 @@ const handleDelete = async (variable) => {
     const response = await apiClient.delete(`/system-variables/${variable.id}`)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'متغیر با موفقیت حذف شد')
+      showToast(response.data.message || 'متغیر با موفقیت حذف شد', 'success')
       fetchVariables()
     }
   } catch (err) {
     console.error('Delete system variable error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف متغیر')
+    showToast(err.response?.data?.message || 'خطا در حذف متغیر', 'error')
   } finally {
     deletingId.value = null
   }

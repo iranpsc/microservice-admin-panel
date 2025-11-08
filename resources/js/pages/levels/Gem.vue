@@ -257,7 +257,9 @@ import apiClient from '../../utils/api'
 import { Button, Card, Checkbox, Input, Modal, LoadingState, ErrorState, FileInput } from '../../components/ui'
 import Editor from 'primevue/editor'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyWarning, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+
+const { showToast } = useToast()
 
 const ExistingFileHint = {
   props: {
@@ -639,18 +641,18 @@ const sendVerificationCode = async () => {
       return true
     }
 
-    notifyError(response.data.message || 'خطا در ارسال کد تایید')
+    showToast(response.data.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } catch (err) {
     console.error('Verification SMS送 error:', err)
-    notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   }
 }
 
 const persistGem = async (payload, verificationData = {}) => {
   if (!levelId.value) {
-    notifyError('شناسه سطح نامعتبر است')
+    showToast('شناسه سطح نامعتبر است', 'error')
     return
   }
 
@@ -665,7 +667,7 @@ const persistGem = async (payload, verificationData = {}) => {
     })
 
     if (response.data.success) {
-      notifySuccess(response.data.message || 'اطلاعات با موفقیت ثبت شد')
+      showToast(response.data.message || 'اطلاعات با موفقیت ثبت شد', 'success')
       showVerificationDialog.value = false
       pendingPayload.value = null
       hasExistingGem.value = true
@@ -673,7 +675,7 @@ const persistGem = async (payload, verificationData = {}) => {
       const gem = response.data.data?.gem || null
       setFormValues(gem)
     } else {
-      notifyError(response.data.message || 'خطا در ثبت اطلاعات')
+      showToast(response.data.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Gem submit error:', err)
@@ -696,7 +698,7 @@ const persistGem = async (payload, verificationData = {}) => {
         verificationFormRef.value?.setErrors?.(verificationErrors)
       }
     } else {
-      notifyError(err.response?.data?.message || 'خطا در ثبت اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } finally {
     saving.value = false
@@ -709,9 +711,9 @@ const handleSubmit = async () => {
   const validationResult = validateForm()
   if (validationResult !== true) {
     if (validationResult === 'noChanges') {
-      notifyWarning('تغییری برای ثبت وجود ندارد.')
+      showToast('تغییری برای ثبت وجود ندارد.', 'warning')
     } else {
-      notifyWarning('لطفاً خطاهای فرم را برطرف کرده و دوباره تلاش کنید.')
+      showToast('لطفاً خطاهای فرم را برطرف کرده و دوباره تلاش کنید.', 'warning')
     }
     return
   }
@@ -740,7 +742,7 @@ const handleAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!pendingPayload.value) {
-    notifyError('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.')
+    showToast('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.', 'error')
     handleCloseVerificationDialog()
     return
   }
@@ -761,7 +763,7 @@ const handleVerificationSubmit = async () => {
   const verificationData = verificationFormRef.value.getData() || {}
 
   if (!pendingPayload.value) {
-    notifyError('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.')
+    showToast('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.', 'error')
     handleCloseVerificationDialog()
     return
   }

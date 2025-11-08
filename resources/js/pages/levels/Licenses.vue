@@ -146,7 +146,9 @@ import { useRoute, useRouter } from 'vue-router'
 import apiClient from '../../utils/api'
 import { Button, Card, Checkbox, Modal, LoadingState, ErrorState } from '../../components/ui'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyWarning, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+
+const { showToast } = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -449,18 +451,18 @@ const sendVerificationCode = async () => {
       return true
     }
 
-    await notifyError(response.data.message || 'خطا در ارسال کد تایید')
+    showToast(response.data.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   }
 }
 
 const persistLicenses = async (payload) => {
   if (!levelId.value) {
-    await notifyError('شناسه سطح نامعتبر است')
+    showToast('شناسه سطح نامعتبر است', 'error')
     return
   }
 
@@ -478,7 +480,7 @@ const persistLicenses = async (payload) => {
     const response = await apiClient[method](url, sanitizedPayload)
 
     if (response.data.success) {
-      notifySuccess(response.data.message || 'اطلاعات با موفقیت ثبت شد')
+      showToast(response.data.message || 'اطلاعات با موفقیت ثبت شد', 'success')
       showVerificationDialog.value = false
       pendingPayload.value = null
       hasExistingLicenses.value = true
@@ -488,7 +490,7 @@ const persistLicenses = async (payload) => {
       verificationFormRef.value?.setErrors?.({})
       verificationFormRef.value?.reset?.()
     } else {
-      await notifyError(response.data.message || 'خطا در ثبت اطلاعات')
+      showToast(response.data.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Licenses submit error:', err)
@@ -511,7 +513,7 @@ const persistLicenses = async (payload) => {
         verificationFormRef.value?.setErrors?.(verificationErrors)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } finally {
     saving.value = false
@@ -524,9 +526,9 @@ const handleSubmit = async () => {
   const validationResult = validateForm()
   if (validationResult !== true) {
     if (validationResult === 'noChanges') {
-      await notifyWarning('تغییری برای ثبت وجود ندارد.')
+      showToast('تغییری برای ثبت وجود ندارد.', 'warning')
     } else {
-      await notifyWarning('لطفاً خطاهای فرم را برطرف کرده و دوباره تلاش کنید.')
+      showToast('لطفاً خطاهای فرم را برطرف کرده و دوباره تلاش کنید.', 'warning')
     }
     return
   }
@@ -555,7 +557,7 @@ const handleAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!pendingPayload.value) {
-    await notifyError('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.')
+    showToast('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.', 'error')
     handleCloseVerificationDialog()
     return
   }
@@ -581,7 +583,7 @@ const handleVerificationSubmit = async () => {
   const verificationData = verificationFormRef.value.getData() || {}
 
   if (!pendingPayload.value) {
-    await notifyError('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.')
+    showToast('اطلاعاتی برای ثبت موجود نیست. لطفاً مجدداً تلاش کنید.', 'error')
     handleCloseVerificationDialog()
     return
   }

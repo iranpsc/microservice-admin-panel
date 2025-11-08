@@ -87,7 +87,10 @@ import { Table, Pagination, LoadingState, ErrorState, Button } from '../../compo
 import CreateRoleModal from '../../components/access-management/CreateRoleModal.vue'
 import UpdateRoleModal from '../../components/access-management/UpdateRoleModal.vue'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm as confirmDialog } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const { setPageTitle } = usePageTitle()
 setPageTitle('مدیریت نقش ها')
@@ -174,7 +177,7 @@ const handleDelete = async (id) => {
 
   try {
     await apiClient.delete(`/roles/${id}`)
-    await notifySuccess('مسئولیت با موفقیت حذف شد')
+    showToast('مسئولیت با موفقیت حذف شد', 'success')
 
     // Handle pagination - if current page becomes empty, go to previous page
     if (pagination.value && pagination.value.current_page > 1) {
@@ -188,7 +191,7 @@ const handleDelete = async (id) => {
     fetchRoles()
   } catch (err) {
     console.error('Delete role error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف مسئولیت')
+    showToast(err.response?.data?.message || 'خطا در حذف مسئولیت', 'error')
   }
 }
 

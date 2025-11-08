@@ -295,7 +295,10 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import apiClient from '../../utils/api'
 import { Table, Pagination, Button, Badge, LoadingState, ErrorState, Modal, Input } from '../../components/ui'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm as confirmDialog } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -524,7 +527,7 @@ const submitUploadForm = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess(response.data.message)
+      showToast(response.data.message, 'success')
       showVerificationDialog.value = false
       if (verificationFormRef.value && verificationFormRef.value.setErrors) {
         verificationFormRef.value.setErrors({})
@@ -542,7 +545,7 @@ const submitUploadForm = async (verificationData = {}) => {
       showUploadModal.value = false
       fetchMaps()
     } else {
-      await notifyError('خطا در بارگذاری فایل')
+      showToast('خطا در بارگذاری فایل', 'error')
     }
   } catch (err) {
     console.error('Upload error:', err)
@@ -560,7 +563,7 @@ const submitUploadForm = async (verificationData = {}) => {
         verificationFormRef.value.setErrors(validationErrors)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در بارگذاری فایل')
+      showToast(err.response?.data?.message || 'خطا در بارگذاری فایل', 'error')
     }
   } finally {
     uploadSaving.value = false
@@ -650,7 +653,7 @@ const submitUpdateForm = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess(response.data.message)
+      showToast(response.data.message, 'success')
       showVerificationDialog.value = false
       if (verificationFormRef.value && verificationFormRef.value.setErrors) {
         verificationFormRef.value.setErrors({})
@@ -659,7 +662,7 @@ const submitUpdateForm = async (verificationData = {}) => {
       closeUpdateModal()
       fetchMaps()
     } else {
-      await notifyError('خطا در ویرایش اطلاعات')
+      showToast('خطا در ویرایش اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Update error:', err)
@@ -677,7 +680,7 @@ const submitUpdateForm = async (verificationData = {}) => {
         verificationFormRef.value.setErrors(validationErrors)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ویرایش اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در ویرایش اطلاعات', 'error')
     }
   } finally {
     updateSaving.value = false
@@ -719,7 +722,7 @@ const submitInsertForm = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess(response.data.message)
+      showToast(response.data.message, 'success')
       showVerificationDialog.value = false
       if (verificationFormRef.value && verificationFormRef.value.setErrors) {
         verificationFormRef.value.setErrors({})
@@ -728,7 +731,7 @@ const submitInsertForm = async (verificationData = {}) => {
       closeInsertIntoDatabaseModal()
       fetchMaps()
     } else {
-      await notifyError('خطا در وارد کردن اطلاعات')
+      showToast('خطا در وارد کردن اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Insert error:', err)
@@ -744,7 +747,7 @@ const submitInsertForm = async (verificationData = {}) => {
         verificationFormRef.value.setErrors(validationErrors)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در وارد کردن اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در وارد کردن اطلاعات', 'error')
     }
   } finally {
     insertSaving.value = false
@@ -775,12 +778,12 @@ const sendVerificationCode = async () => {
       showVerificationDialog.value = true
       return true
     } else {
-      await notifyError('خطا در ارسال کد تایید')
+      showToast('خطا در ارسال کد تایید', 'error')
       return false
     }
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } finally {
     // Reset saving state based on action
@@ -792,7 +795,7 @@ const sendVerificationCode = async () => {
 
 const handleAutoVerifyAndSubmit = async (verificationData) => {
   if (!verificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -865,10 +868,10 @@ const handleDelete = async (map) => {
     const response = await apiClient.delete(`/maps/${map.id}`)
 
     if (response.data.success) {
-      await notifySuccess('نقشه با موفقیت حذف شد')
+      showToast('نقشه با موفقیت حذف شد', 'success')
       fetchMaps()
     } else {
-      await notifyError('خطا در حذف نقشه')
+      showToast('خطا در حذف نقشه', 'error')
     }
   } catch (err) {
     // If error is not from API (user cancelled), just return
@@ -877,7 +880,7 @@ const handleDelete = async (map) => {
     }
 
     console.error('Delete map error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف نقشه')
+    showToast(err.response?.data?.message || 'خطا در حذف نقشه', 'error')
   }
 }
 

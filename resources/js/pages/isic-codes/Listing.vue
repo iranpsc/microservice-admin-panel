@@ -195,7 +195,10 @@
 import { onMounted, reactive, ref } from 'vue'
 import apiClient from '../../utils/api'
 import { Badge, Button, ErrorState, FileInput, Input, LoadingState, Modal, Pagination, SearchBox, Table } from '../../components/ui'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -329,7 +332,7 @@ const submitCreate = async () => {
     const { data } = await apiClient.post('/isic-codes', payload)
 
     if (data?.success) {
-      notifySuccess(data.message || 'کد ISIC با موفقیت ایجاد شد.')
+      showToast(data.message || 'کد ISIC با موفقیت ایجاد شد.', 'success')
       closeCreateModal()
       currentPage.value = 1
       await fetchIsicCodes()
@@ -343,10 +346,10 @@ const submitCreate = async () => {
       const validationErrors = err.response?.data?.errors || {}
       formErrors.name = validationErrors.name?.[0] || ''
       formErrors.code = validationErrors.code?.[0] || ''
-      notifyError(err.response?.data?.message || 'ورودی‌های ارسالی معتبر نیست.')
+      showToast(err.response?.data?.message || 'ورودی‌های ارسالی معتبر نیست.', 'error')
     } else {
       const message = err.response?.data?.message || err.message || 'خطایی در ثبت کد ISIC رخ داده است.'
-      notifyError(message)
+      showToast(message, 'error')
     }
   } finally {
     saving.value = false
@@ -384,7 +387,7 @@ const submitImport = async () => {
     })
 
     if (data?.success) {
-      notifySuccess(data.message || 'درون‌ریزی کدهای ISIC آغاز شد.')
+      showToast(data.message || 'درون‌ریزی کدهای ISIC آغاز شد.', 'success')
       closeImportModal()
       await fetchIsicCodes()
     } else {
@@ -399,7 +402,7 @@ const submitImport = async () => {
       importError.value = err.response?.data?.message || err.message || 'خطا در پردازش فایل درون‌ریزی.'
     }
 
-    notifyError(importError.value)
+    showToast(importError.value, 'error')
   } finally {
     importing.value = false
   }
@@ -421,7 +424,7 @@ const handleApprove = async (row) => {
     const { data } = await apiClient.post(`/isic-codes/${row.id}/approve`)
 
     if (data?.success) {
-      notifySuccess(data.message || 'کد ISIC تایید شد.')
+      showToast(data.message || 'کد ISIC تایید شد.', 'success')
       const updated = data.data?.isic_code
       if (updated) {
         updateIsicCodeInList(updated)
@@ -434,7 +437,7 @@ const handleApprove = async (row) => {
   } catch (err) {
     console.error('ISIC code approve error:', err)
     const message = err.response?.data?.message || err.message || 'خطا در تایید کد ISIC'
-    notifyError(message)
+    showToast(message, 'error')
   } finally {
     actionLoading.approve = null
   }
@@ -446,7 +449,7 @@ const handleDeny = async (row) => {
     const { data } = await apiClient.post(`/isic-codes/${row.id}/deny`)
 
     if (data?.success) {
-      notifySuccess(data.message || 'کد ISIC در انتظار تایید قرار گرفت.')
+      showToast(data.message || 'کد ISIC در انتظار تایید قرار گرفت.', 'success')
       const updated = data.data?.isic_code
       if (updated) {
         updateIsicCodeInList(updated)
@@ -459,7 +462,7 @@ const handleDeny = async (row) => {
   } catch (err) {
     console.error('ISIC code deny error:', err)
     const message = err.response?.data?.message || err.message || 'خطا در تغییر وضعیت کد ISIC'
-    notifyError(message)
+    showToast(message, 'error')
   } finally {
     actionLoading.deny = null
   }
@@ -480,7 +483,7 @@ const handleDelete = async (row) => {
     const { data } = await apiClient.delete(`/isic-codes/${row.id}`)
 
     if (data?.success) {
-      notifySuccess(data.message || 'کد ISIC با موفقیت حذف شد.')
+      showToast(data.message || 'کد ISIC با موفقیت حذف شد.', 'success')
 
       const isLastItem = isicCodes.value.length === 1
       const isNotFirstPage = currentPage.value > 1
@@ -500,7 +503,7 @@ const handleDelete = async (row) => {
 
     console.error('ISIC code delete error:', err)
     const message = err.response?.data?.message || err.message || 'خطا در حذف کد ISIC'
-    notifyError(message)
+    showToast(message, 'error')
   } finally {
     actionLoading.delete = null
   }

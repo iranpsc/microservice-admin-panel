@@ -171,7 +171,10 @@
 import { computed, onMounted, ref } from 'vue'
 import apiClient from '../../utils/api'
 import { Button, ErrorState, FileInput, LoadingState, Modal, Pagination, SearchBox, Table } from '../../components/ui'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -340,7 +343,7 @@ const submitImport = async () => {
     })
 
     if (response.data?.success) {
-      notifySuccess(response.data.message || 'درون‌ریزی آغاز شد.')
+      showToast(response.data.message || 'درون‌ریزی آغاز شد.', 'success')
       closeImportModal()
       fetchQuestions()
     } else {
@@ -357,7 +360,7 @@ const submitImport = async () => {
       importError.value = err.message || 'خطا در پردازش درخواست'
     }
 
-    notifyError(importError.value)
+    showToast(importError.value, 'error')
   } finally {
     importing.value = false
   }
@@ -379,7 +382,7 @@ const handleDelete = async (question) => {
     const response = await apiClient.delete(`/challenge/questions/${question.id}`)
 
     if (response.data?.success) {
-      notifySuccess(response.data.message || 'سوال با موفقیت حذف شد.')
+      showToast(response.data.message || 'سوال با موفقیت حذف شد.', 'success')
 
       const isLastItem = questions.value.length === 1
       const isNotFirstPage = currentPage.value > 1
@@ -399,7 +402,7 @@ const handleDelete = async (question) => {
 
     console.error('Challenge question delete error:', err)
     const message = err.response?.data?.message || err.message || 'خطا در حذف سوال'
-    notifyError(message)
+    showToast(message, 'error')
   } finally {
     deletingId.value = null
   }

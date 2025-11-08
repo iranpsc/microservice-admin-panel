@@ -181,7 +181,10 @@ import { ref, onMounted } from 'vue'
 import Editor from 'primevue/editor'
 import apiClient from '../../utils/api'
 import { Table, Modal, Button, Select, Alert, LoadingState, ErrorState } from '../../components/ui'
-import { confirm, notifySuccess, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -332,10 +335,10 @@ const handleCreate = async () => {
     if (response.data.success) {
       await fetchMessages()
       closeCreateModal()
-      notifySuccess('اطلاعات با موفقیت ثبت شد')
+      showToast('اطلاعات با موفقیت ثبت شد', 'success')
     } else {
       const errorMsg = response.data.message || 'خطا در ثبت اطلاعات'
-      notifyError(errorMsg)
+      showToast(errorMsg, 'error')
       error.value = errorMsg
     }
   } catch (err) {
@@ -345,13 +348,13 @@ const handleCreate = async () => {
       // Show first error message
       const firstError = Object.values(err.response.data.errors)[0]
       if (Array.isArray(firstError)) {
-        notifyError(firstError[0])
+        showToast(firstError[0], 'error')
       } else {
-        notifyError(firstError)
+        showToast(firstError, 'error')
       }
     } else {
       const errorMsg = err.response?.data?.message || 'خطا در ثبت اطلاعات'
-      notifyError(errorMsg)
+      showToast(errorMsg, 'error')
       error.value = errorMsg
     }
   } finally {
@@ -378,10 +381,10 @@ const handleUpdate = async () => {
     if (response.data.success) {
       await fetchMessages()
       closeEditModal()
-      notifySuccess('اطلاعات با موفقیت به‌روزرسانی شد')
+      showToast('اطلاعات با موفقیت به‌روزرسانی شد', 'success')
     } else {
       const errorMsg = response.data.message || 'خطا در به‌روزرسانی اطلاعات'
-      notifyError(errorMsg)
+      showToast(errorMsg, 'error')
       error.value = errorMsg
     }
   } catch (err) {
@@ -391,13 +394,13 @@ const handleUpdate = async () => {
       // Show first error message
       const firstError = Object.values(err.response.data.errors)[0]
       if (Array.isArray(firstError)) {
-        notifyError(firstError[0])
+        showToast(firstError[0], 'error')
       } else {
-        notifyError(firstError)
+        showToast(firstError, 'error')
       }
     } else {
       const errorMsg = err.response?.data?.message || 'خطا در به‌روزرسانی اطلاعات'
-      notifyError(errorMsg)
+      showToast(errorMsg, 'error')
       error.value = errorMsg
     }
   } finally {
@@ -426,16 +429,16 @@ const handleDelete = async (message) => {
 
     if (response.data.success) {
       await fetchMessages()
-      notifySuccess('پیام با موفقیت حذف شد')
+      showToast('پیام با موفقیت حذف شد', 'success')
     } else {
       const errorMsg = response.data.message || 'خطا در حذف پیام'
-      notifyError(errorMsg)
+      showToast(errorMsg, 'error')
       error.value = errorMsg
     }
   } catch (err) {
     console.error('Delete message error:', err)
     const errorMsg = err.response?.data?.message || 'خطا در حذف پیام'
-    notifyError(errorMsg)
+    showToast(errorMsg, 'error')
     error.value = errorMsg
   }
 }

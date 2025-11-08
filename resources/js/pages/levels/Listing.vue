@@ -482,8 +482,11 @@ import { useRouter } from 'vue-router'
 import apiClient from '../../utils/api'
 import { Table, Pagination, Button, Modal, Input, Alert, LoadingState, ErrorState, FileInput } from '../../components/ui'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm as confirmDialog } from '../../utils/notifications'
 import { usePageTitle } from '../../composables/usePageTitle'
+
+const { showToast } = useToast()
 
 const { setPageTitle } = usePageTitle()
 setPageTitle('مدیریت سطوح')
@@ -778,11 +781,11 @@ const sendVerificationCode = async () => {
       return true
     }
 
-    await notifyError('خطا در ارسال کد تایید')
+    showToast('خطا در ارسال کد تایید', 'error')
     return false
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   }
 }
@@ -815,13 +818,13 @@ const submitCreateLevel = async (verificationData = {}) => {
     })
 
     if (response.data?.success) {
-      await notifySuccess(response.data?.message || 'سطح با موفقیت ایجاد شد')
+      showToast(response.data?.message || 'سطح با موفقیت ایجاد شد', 'success')
       showCreateVerificationDialog.value = false
       createPendingData.value = null
       closeCreateModal()
       fetchLevels()
     } else {
-      await notifyError(response.data?.message || 'خطا در ثبت سطح')
+      showToast(response.data?.message || 'خطا در ثبت سطح', 'error')
     }
   } catch (err) {
     console.error('Create level error:', err)
@@ -847,7 +850,7 @@ const submitCreateLevel = async (verificationData = {}) => {
         createVerificationFormRef.value?.setErrors?.(verificationErrorsBag)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت سطح')
+      showToast(err.response?.data?.message || 'خطا در ثبت سطح', 'error')
       shouldReopenForm = true
     }
 
@@ -892,13 +895,13 @@ const submitUpdateLevel = async (verificationData = {}) => {
     })
 
     if (response.data?.success) {
-      await notifySuccess(response.data?.message || 'سطح با موفقیت بروزرسانی شد')
+      showToast(response.data?.message || 'سطح با موفقیت بروزرسانی شد', 'success')
       showUpdateVerificationDialog.value = false
       updatePendingData.value = null
       closeUpdateModal()
       fetchLevels()
     } else {
-      await notifyError(response.data?.message || 'خطا در بروزرسانی سطح')
+      showToast(response.data?.message || 'خطا در بروزرسانی سطح', 'error')
     }
   } catch (err) {
     console.error('Update level error:', err)
@@ -924,7 +927,7 @@ const submitUpdateLevel = async (verificationData = {}) => {
         updateVerificationFormRef.value?.setErrors?.(verificationErrorsBag)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در بروزرسانی سطح')
+      showToast(err.response?.data?.message || 'خطا در بروزرسانی سطح', 'error')
       shouldReopenForm = true
     }
 
@@ -1007,7 +1010,7 @@ const handleCreateAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!createVerificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -1020,7 +1023,7 @@ const handleCreateVerificationSubmit = async () => {
   }
 
   if (!createVerificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -1039,7 +1042,7 @@ const handleUpdateAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!updateVerificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -1052,7 +1055,7 @@ const handleUpdateVerificationSubmit = async () => {
   }
 
   if (!updateVerificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -1112,14 +1115,14 @@ const handleDelete = async (level) => {
 
     const response = await apiClient.delete(`/levels/${level.id}`)
     if (response.data?.success) {
-      await notifySuccess(response.data?.message || 'سطح با موفقیت حذف شد')
+      showToast(response.data?.message || 'سطح با موفقیت حذف شد', 'success')
       fetchLevels()
     } else {
-      await notifyError(response.data?.message || 'خطا در حذف سطح')
+      showToast(response.data?.message || 'خطا در حذف سطح', 'error')
     }
   } catch (err) {
     console.error('Delete level error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف سطح')
+    showToast(err.response?.data?.message || 'خطا در حذف سطح', 'error')
   }
 }
 

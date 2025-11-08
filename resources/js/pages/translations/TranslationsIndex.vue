@@ -143,7 +143,10 @@ import Alert from '../../components/ui/Alert.vue'
 import LoadingState from '../../components/ui/LoadingState.vue'
 import ErrorState from '../../components/ui/ErrorState.vue'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const { setTitle } = usePageTitle()
 setTitle('مدیریت ترجمه‌ها')
@@ -217,12 +220,12 @@ const handleCreateTranslation = async () => {
   creating.value = true
   try {
     await translationApi.createTranslation({ code: selectedLanguageCode.value })
-    notifySuccess('ساختار ترجمه بر اساس زبان انتخابی ایجاد شد.')
+    showToast('ساختار ترجمه بر اساس زبان انتخابی ایجاد شد.', 'success')
     selectedLanguageCode.value = ''
     await fetchTranslations(1)
   } catch (err) {
     const messages = err?.response?.data?.errors?.code
-    notifyError(Array.isArray(messages) ? messages[0] : (err?.response?.data?.message || 'امکان افزودن ترجمه وجود ندارد.'))
+    showToast(Array.isArray(messages) ? messages[0] : (err?.response?.data?.message || 'امکان افزودن ترجمه وجود ندارد.'), 'error')
   } finally {
     creating.value = false
   }
@@ -237,10 +240,10 @@ const handleDelete = async (translation) => {
 
   try {
     await translationApi.deleteTranslation(translation.id)
-    notifySuccess('ترجمه انتخابی حذف شد.')
+    showToast('ترجمه انتخابی حذف شد.', 'success')
     await fetchTranslations(page.value)
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'حذف ترجمه امکان‌پذیر نبود.')
+    showToast(err?.response?.data?.message || 'حذف ترجمه امکان‌پذیر نبود.', 'error')
   }
 }
 
@@ -251,9 +254,9 @@ const handleToggleStatus = async (translation) => {
     translations.value = translations.value.map((item) =>
       item.id === updated.id ? updated : item
     )
-    notifySuccess(`ترجمه ${updated.status ? 'فعال' : 'غیرفعال'} شد.`)
+    showToast(`ترجمه ${updated.status ? 'فعال' : 'غیرفعال'} شد.`, 'success')
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'امکان تغییر وضعیت وجود ندارد.')
+    showToast(err?.response?.data?.message || 'امکان تغییر وضعیت وجود ندارد.', 'error')
   }
 }
 
@@ -271,12 +274,12 @@ const handleExport = async (translation) => {
       link.remove()
       window.URL.revokeObjectURL(url)
 
-      notifySuccess(`فایل JSON برای ${translation.name} دانلود شد.`)
+      showToast(`فایل JSON برای ${translation.name} دانلود شد.`, 'success')
     } else if (result.type === 'message') {
-      notifySuccess(result.data?.message || 'صادرات با موفقیت انجام شد.')
+      showToast(result.data?.message || 'صادرات با موفقیت انجام شد.', 'success')
     }
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'امکان صادرات ترجمه وجود ندارد.')
+    showToast(err?.response?.data?.message || 'امکان صادرات ترجمه وجود ندارد.', 'error')
   }
 }
 

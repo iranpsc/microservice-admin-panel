@@ -32,25 +32,6 @@
           </div>
         </div>
 
-        <!-- Production Warning -->
-        <div
-          v-if="isProduction"
-          class="p-4 bg-warning/20 border border-warning/30 rounded-lg"
-        >
-          <strong class="text-warning block mb-2">توجه!</strong>
-          <p class="text-sm text-[var(--theme-text-secondary)]">
-            در صورتی که متن احراز ویدیویی تعریف شده باشد، امکان تغییر آن وجود ندارد.
-          </p>
-        </div>
-
-        <!-- Verification Form (Production Only) -->
-        <div v-if="isProduction">
-          <VerificationForm
-            ref="verificationFormRef"
-            @verified="handleVerified"
-          />
-        </div>
-
         <hr class="border-[var(--theme-border)]" />
 
         <!-- Existing Texts -->
@@ -140,24 +121,6 @@
           <p v-if="editErrors.text" class="text-xs text-error">{{ editErrors.text }}</p>
         </div>
 
-        <!-- Production Warning -->
-        <div
-          v-if="isProduction"
-          class="p-4 bg-warning/20 border border-warning/30 rounded-lg"
-        >
-          <strong class="text-warning block mb-2">توجه!</strong>
-          <p class="text-sm text-[var(--theme-text-secondary)]">
-            برای به‌روزرسانی متن، نیاز به تایید مجدد دارید.
-          </p>
-        </div>
-
-        <!-- Verification Form (Production Only) -->
-        <div v-if="isProduction">
-          <VerificationForm
-            ref="editVerificationFormRef"
-            @verified="handleEditVerified"
-          />
-        </div>
       </div>
     </div>
 
@@ -205,11 +168,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import apiClient from '../../utils/api'
 import { Modal, Button, Spinner, Alert } from '../ui'
-import VerificationForm from '../VerificationForm.vue'
-import { notifySuccess, notifyError, confirm } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { notifyError, confirm } from '../../utils/notifications'
 
 const props = defineProps({
   show: {
@@ -229,8 +192,6 @@ const updating = ref(false)
 const texts = ref([])
 const errors = ref({})
 const editErrors = ref({})
-const verificationFormRef = ref(null)
-const editVerificationFormRef = ref(null)
 const currentPage = ref(1)
 const hasMorePages = ref(false)
 const perPage = ref(10)
@@ -239,21 +200,11 @@ const selectedText = ref(null)
 const isEditing = ref(false)
 const editText = ref('')
 
-const isProduction = computed(() => {
-  return import.meta.env.MODE === 'production'
-})
+const { showToast } = useToast()
 
 const truncateText = (text, maxLength = 100) => {
   if (!text || text.length <= maxLength) return text
   return text.substring(0, maxLength) + '...'
-}
-
-const handleVerified = () => {
-  // Verification form has validated
-}
-
-const handleEditVerified = () => {
-  // Edit verification form has validated
 }
 
 const openTextDialog = (textItem) => {
@@ -268,18 +219,12 @@ const startEditing = () => {
   isEditing.value = true
   editText.value = selectedText.value?.text || ''
   editErrors.value = {}
-  if (editVerificationFormRef.value) {
-    editVerificationFormRef.value.reset()
-  }
 }
 
 const cancelEditing = () => {
   isEditing.value = false
   editText.value = selectedText.value?.text || ''
   editErrors.value = {}
-  if (editVerificationFormRef.value) {
-    editVerificationFormRef.value.reset()
-  }
 }
 
 const handleUpdate = async () => {
@@ -291,25 +236,14 @@ const handleUpdate = async () => {
       return
     }
 
-    // Validate verification in production
-    if (isProduction.value && editVerificationFormRef.value) {
-      const verificationValid = await editVerificationFormRef.value.validate()
-      if (!verificationValid) {
-        return
-      }
-    }
-
     updating.value = true
 
-    const verificationData = editVerificationFormRef.value?.getData() || {}
-
     const response = await apiClient.put(`/kyc-video-texts/${selectedText.value.id}`, {
-      text: editText.value,
-      ...verificationData
+      text: editText.value
     })
 
     if (response.data.success) {
-      await notifySuccess('متن احراز ویدیویی با موفقیت به‌روزرسانی شد.')
+      showToast('متن احراز ویدیویی با موفقیت به‌روزرسانی شد.', 'success')
 
       // Update the item in the local array
       const index = texts.value.findIndex(item => item.id === selectedText.value.id)
@@ -319,9 +253,6 @@ const handleUpdate = async () => {
       }
 
       isEditing.value = false
-      if (editVerificationFormRef.value) {
-        editVerificationFormRef.value.reset()
-      }
     } else {
       editErrors.value = response.data.errors || {}
     }
@@ -356,30 +287,16 @@ const handleSave = async () => {
       return
     }
 
-    // Validate verification in production
-    if (isProduction.value && verificationFormRef.value) {
-      const verificationValid = await verificationFormRef.value.validate()
-      if (!verificationValid) {
-        return
-      }
-    }
-
     saving.value = true
 
-    const verificationData = verificationFormRef.value?.getData() || {}
-
     const response = await apiClient.post('/kyc-video-texts', {
-      text: text.value,
-      ...verificationData
+      text: text.value
     })
 
     if (response.data.success) {
-      await notifySuccess('متن احراز ویدیویی با موفقیت ثبت شد.')
+      showToast('متن احراز ویدیویی با موفقیت ثبت شد.', 'success')
 
       text.value = ''
-      if (verificationFormRef.value) {
-        verificationFormRef.value.reset()
-      }
       currentPage.value = 1
       hasMorePages.value = false
       fetchTexts(1, false)
@@ -416,7 +333,7 @@ const handleDelete = async (id) => {
     const response = await apiClient.delete(`/kyc-video-texts/${id}`)
 
     if (response.data.success) {
-      await notifySuccess('متن احراز ویدیویی با موفقیت حذف شد.')
+      showToast('متن احراز ویدیویی با موفقیت حذف شد.', 'success')
       // Remove deleted item from local array instead of refetching all
       texts.value = texts.value.filter(item => item.id !== id)
       // Check if we need to load more items to fill the gap
@@ -487,9 +404,6 @@ watch(() => showTextDialog.value, (newVal) => {
     selectedText.value = null
     editText.value = ''
     editErrors.value = {}
-    if (editVerificationFormRef.value) {
-      editVerificationFormRef.value.reset()
-    }
   }
 })
 

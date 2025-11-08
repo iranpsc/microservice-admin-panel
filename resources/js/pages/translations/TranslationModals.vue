@@ -185,7 +185,10 @@ import LoadingState from '../../components/ui/LoadingState.vue'
 import ErrorState from '../../components/ui/ErrorState.vue'
 import { translationApi } from '../../api/translations'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -279,7 +282,7 @@ const handleCreate = async () => {
     await translationApi.createModal(translationId, {
       name: createForm.name.trim()
     })
-    notifySuccess('بخش جدید برای تمامی زبان‌ها ثبت شد.')
+    showToast('بخش جدید برای تمامی زبان‌ها ثبت شد.', 'success')
     showCreateModal.value = false
     resetCreateForm()
     await fetchModals(page.value)
@@ -313,7 +316,7 @@ const handleUpdate = async () => {
     modals.value = modals.value.map((item) =>
       item.id === activeModalId.value ? updatedModal : item
     )
-    notifySuccess('نام بخش در تمامی زبان‌ها بروزرسانی گردید.')
+    showToast('نام بخش در تمامی زبان‌ها بروزرسانی گردید.', 'success')
     showEditModal.value = false
     resetEditForm()
   } catch (err) {
@@ -333,10 +336,10 @@ const handleDelete = async (modal) => {
 
   try {
     await translationApi.deleteModal(translationId, modal.id)
-    notifySuccess('تمامی نسخه‌های این بخش حذف گردید.')
+    showToast('تمامی نسخه‌های این بخش حذف گردید.', 'success')
     await fetchModals(page.value)
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'حذف بخش امکان‌پذیر نبود.')
+    showToast(err?.response?.data?.message || 'حذف بخش امکان‌پذیر نبود.', 'error')
   }
 }
 

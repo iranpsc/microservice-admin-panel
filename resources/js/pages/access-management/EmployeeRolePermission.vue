@@ -90,7 +90,10 @@ import { Table, LoadingState, ErrorState, Button, Badge } from '../../components
 import CreateAdminModal from '../../components/access-management/CreateAdminModal.vue'
 import UpdateAdminModal from '../../components/access-management/UpdateAdminModal.vue'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { notifySuccess, notifyError, confirm } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const { setPageTitle } = usePageTitle()
 setPageTitle('مدیریت دسترسی کارمندان')
@@ -166,11 +169,11 @@ const handleDelete = async (id) => {
 
   try {
     await apiClient.delete(`/admins/${id}`)
-    await notifySuccess('کاربر با موفقیت حذف شد')
+    showToast('کاربر با موفقیت حذف شد', 'success')
     fetchAdmins()
   } catch (err) {
     console.error('Delete admin error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف کاربر')
+    showToast(err.response?.data?.message || 'خطا در حذف کاربر', 'error')
   }
 }
 

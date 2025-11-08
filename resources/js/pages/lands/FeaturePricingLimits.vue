@@ -19,30 +19,14 @@
     <!-- Main Content -->
     <div v-else class="space-y-6">
       <!-- Price Limits History Table -->
-      <div v-if="priceLimits" class="mb-6">
-        <div class="overflow-x-auto rounded-lg border border-[var(--theme-border)]">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="bg-[var(--theme-bg-glass)] border-b-2 border-[var(--theme-border)]">
-                <th class="px-4 py-3 text-sm font-semibold text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-center"></th>
-                <th class="px-4 py-3 text-sm font-semibold text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-right">تاریخ تغییر</th>
-                <th class="px-4 py-3 text-sm font-semibold text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-right">ساعت تغییر</th>
-                <th class="px-4 py-3 text-sm font-semibold text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-right">نام تغییر دهنده</th>
-                <th class="px-4 py-3 text-sm font-semibold text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-right">میزان تغییر</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--theme-border)]">
-              <tr class="hover:bg-[var(--theme-bg-glass)]">
-                <td class="px-4 py-3 text-sm text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-center">1</td>
-                <td class="px-4 py-3 text-sm text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-right">{{ priceLimits.updated_at_date }}</td>
-                <td class="px-4 py-3 text-sm text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-right">{{ priceLimits.updated_at_time }}</td>
-                <td class="px-4 py-3 text-sm text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-right">{{ priceLimits.changer_name }}</td>
-                <td class="px-4 py-3 text-sm text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-right">{{ priceLimits.change_amount }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Table
+        v-if="priceLimits"
+        :columns="priceLimitsColumns"
+        :data="priceLimitsTableData"
+        container-class="mb-6"
+        row-number-header-class="text-center"
+        row-number-cell-class="text-center"
+      />
 
       <!-- No Price Limits Alert -->
       <Alert
@@ -112,9 +96,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import apiClient from '../../utils/api'
-import { Modal, Input, Button, Alert, LoadingState, ErrorState } from '../../components/ui'
+import { Modal, Input, Button, Alert, LoadingState, ErrorState, Table } from '../../components/ui'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -123,6 +109,32 @@ const saving = ref(false)
 const errors = ref({})
 const verificationFormRef = ref(null)
 const showVerificationDialog = ref(false)
+
+const priceLimitsColumns = [
+  {
+    key: 'updated_at_date',
+    label: 'تاریخ تغییر',
+    textSecondary: true,
+    cellClass: 'text-right',
+    headerClass: 'text-right'
+  },
+  {
+    key: 'updated_at_time',
+    label: 'ساعت تغییر',
+    textSecondary: true,
+    cellClass: 'text-right',
+    headerClass: 'text-right'
+  },
+  {
+    key: 'changer_name',
+    label: 'نام تغییر دهنده',
+    textSecondary: true,
+    cellClass: 'text-right',
+    headerClass: 'text-right'
+  }
+]
+
+const priceLimitsTableData = computed(() => (priceLimits.value ? [priceLimits.value] : []))
 
 const formData = ref({
   public_price_limit: 0,
@@ -145,12 +157,12 @@ const sendVerificationCode = async () => {
       showVerificationDialog.value = true
       return true
     } else {
-      await notifyError('خطا در ارسال کد تایید')
+      showToast('خطا در ارسال کد تایید', 'error')
       return false
     }
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } finally {
     // Reset saving state after verification code is sent (success or failure)
@@ -171,7 +183,7 @@ const submitPricingLimitsUpdate = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess('محدودیت‌های قیمت با موفقیت به‌روزرسانی شدند')
+      showToast('محدودیت‌های قیمت با موفقیت به‌روزرسانی شدند', 'success')
       showVerificationDialog.value = false
       // Reset verification form errors on success
       if (verificationFormRef.value && verificationFormRef.value.setErrors) {
@@ -254,7 +266,7 @@ const handleAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!verificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -291,7 +303,6 @@ const fetchPriceLimits = async () => {
         priceLimits.value.updated_at_date = formatDate(priceLimits.value.updated_at)
         priceLimits.value.updated_at_time = formatTime(priceLimits.value.updated_at)
         priceLimits.value.changer_name = priceLimits.value.changer_name || '-'
-        priceLimits.value.change_amount = 0
       }
     } else {
       error.value = 'خطا در دریافت اطلاعات محدودیت قیمت'

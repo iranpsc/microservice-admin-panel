@@ -128,8 +128,11 @@ import {
   ErrorState
 } from '../../components/ui'
 import PersianDatePicker from '../../components/ui/PersianDatePicker.vue'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
 import { formatPersianDate } from '../../utils/dateFormatter'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -281,12 +284,12 @@ const handleCreateSubmit = async () => {
     const response = await apiClient.post('/versions', payload)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'ورژن جدید با موفقیت ایجاد شد')
+      showToast(response.data.message || 'ورژن جدید با موفقیت ایجاد شد', 'success')
       handleCreateModalClose()
       currentPage.value = 1
       await fetchVersions()
     } else {
-      await notifyError(response.data.message || 'خطا در ثبت ورژن')
+      showToast(response.data.message || 'خطا در ثبت ورژن', 'error')
     }
   } catch (err) {
     console.error('Version create error:', err)
@@ -294,7 +297,7 @@ const handleCreateSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       assignValidationErrors(createErrors, err.response.data.errors)
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت ورژن')
+      showToast(err.response?.data?.message || 'خطا در ثبت ورژن', 'error')
     }
   } finally {
     saving.value = false
@@ -315,13 +318,13 @@ const handleDelete = async (version) => {
     const response = await apiClient.delete(`/versions/${version.id}`)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'ورژن با موفقیت حذف شد')
+      showToast(response.data.message || 'ورژن با موفقیت حذف شد', 'success')
       if (versions.value.length === 1 && currentPage.value > 1) {
         currentPage.value -= 1
       }
       await fetchVersions()
     } else {
-      await notifyError(response.data.message || 'خطا در حذف ورژن')
+      showToast(response.data.message || 'خطا در حذف ورژن', 'error')
     }
   } catch (err) {
     console.error('Version delete error:', err)
@@ -330,7 +333,7 @@ const handleDelete = async (version) => {
       return
     }
 
-    await notifyError(err.response?.data?.message || 'خطا در حذف ورژن')
+    showToast(err.response?.data?.message || 'خطا در حذف ورژن', 'error')
   }
 }
 

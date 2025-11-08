@@ -353,8 +353,10 @@ import apiClient from '../../utils/api'
 import { Table, Pagination, Button, LoadingState, ErrorState, Alert, Modal, Input, Badge } from '../../components/ui'
 import PersianDatePicker from '../../components/ui/PersianDatePicker.vue'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
 import { gregorianToShamsiSync } from '../../utils/dateConverter'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -463,12 +465,12 @@ const sendVerificationCode = async () => {
       showVerificationDialog.value = true
       return true
     } else {
-      await notifyError('خطا در ارسال کد تایید')
+      showToast('خطا در ارسال کد تایید', 'error')
       return false
     }
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } finally {
     // Reset saving state after verification code is sent (success or failure)
@@ -489,7 +491,7 @@ const submitFeatureLimitCreate = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess('محدودیت املاک با موفقیت ایجاد شد')
+      showToast('محدودیت املاک با موفقیت ایجاد شد', 'success')
       showVerificationDialog.value = false
       // Reset verification form errors on success
       if (verificationFormRef.value && verificationFormRef.value.setErrors) {
@@ -558,7 +560,7 @@ const handleAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!verificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -625,12 +627,12 @@ const sendDeleteVerificationCode = async () => {
       showDeleteVerificationDialog.value = true
       return true
     } else {
-      await notifyError('خطا در ارسال کد تایید')
+      showToast('خطا در ارسال کد تایید', 'error')
       return false
     }
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } finally {
     // Reset deleting state after verification code is sent (success or failure)
@@ -652,7 +654,7 @@ const performDelete = async (verificationData = {}) => {
     })
 
     if (response.data.success) {
-      await notifySuccess('محدودیت املاک با موفقیت حذف شد')
+      showToast('محدودیت املاک با موفقیت حذف شد', 'success')
       showDeleteVerificationDialog.value = false
       // Reset verification form errors on success
       if (deleteVerificationFormRef.value && deleteVerificationFormRef.value.setErrors) {
@@ -663,7 +665,7 @@ const performDelete = async (verificationData = {}) => {
     }
   } catch (err) {
     console.error('Delete feature limit error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف محدودیت')
+    showToast(err.response?.data?.message || 'خطا در حذف محدودیت', 'error')
 
     // Extract validation errors and display them on the form fields
     if (err.response?.data?.errors && deleteVerificationFormRef.value && deleteVerificationFormRef.value.setErrors) {
@@ -692,7 +694,7 @@ const handleAutoVerifyAndDelete = async (verificationData) => {
   }
 
   if (!deleteVerificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 

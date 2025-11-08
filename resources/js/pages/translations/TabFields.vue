@@ -179,7 +179,10 @@ import LoadingState from '../../components/ui/LoadingState.vue'
 import ErrorState from '../../components/ui/ErrorState.vue'
 import { translationApi } from '../../api/translations'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -278,7 +281,7 @@ const handleCreate = async () => {
     await translationApi.createField(translationId, modalId, tabId, {
       value: createForm.value.trim()
     })
-    notifySuccess('عبارت جدید به ساختار تمام زبان‌ها اضافه شد.')
+    showToast('عبارت جدید به ساختار تمام زبان‌ها اضافه شد.', 'success')
     showCreateModal.value = false
     resetCreateForm()
     await fetchFields(page.value)
@@ -312,7 +315,7 @@ const handleUpdate = async () => {
     fields.value = fields.value.map((item) =>
       item.id === activeFieldId.value ? updatedField : item
     )
-    notifySuccess('عبارت مربوط به این زبان بروزرسانی گردید.')
+    showToast('عبارت مربوط به این زبان بروزرسانی گردید.', 'success')
     showEditModal.value = false
     resetEditForm()
   } catch (err) {
@@ -336,10 +339,10 @@ const handleDelete = async (field) => {
 
   try {
     await translationApi.deleteField(translationId, modalId, tabId, field.id)
-    notifySuccess('تمامی نسخه‌های این عبارت حذف گردید.')
+    showToast('تمامی نسخه‌های این عبارت حذف گردید.', 'success')
     await fetchFields(page.value)
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'حذف عبارت امکان‌پذیر نبود.')
+    showToast(err?.response?.data?.message || 'حذف عبارت امکان‌پذیر نبود.', 'error')
   }
 }
 

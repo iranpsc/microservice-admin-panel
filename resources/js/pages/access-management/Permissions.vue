@@ -87,7 +87,10 @@ import { Table, Pagination, LoadingState, ErrorState, Button } from '../../compo
 import CreatePermissionModal from '../../components/access-management/CreatePermissionModal.vue'
 import UpdatePermissionModal from '../../components/access-management/UpdatePermissionModal.vue'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm as confirmDialog } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const { setPageTitle } = usePageTitle()
 setPageTitle('مدیریت دسترسی ها')
@@ -177,11 +180,11 @@ const handleDelete = async (id) => {
 
     // Proceed with deletion
     await apiClient.delete(`/permissions/${id}`)
-    await notifySuccess('دسترسی با موفقیت حذف شد')
+    showToast('دسترسی با موفقیت حذف شد', 'success')
     fetchPermissions()
   } catch (err) {
     console.error('Delete permission error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف دسترسی')
+    showToast(err.response?.data?.message || 'خطا در حذف دسترسی', 'error')
   }
 }
 

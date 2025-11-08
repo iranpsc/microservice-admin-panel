@@ -284,7 +284,10 @@
 import { ref, onMounted, computed } from 'vue'
 import apiClient from '../../utils/api'
 import { Table, Modal, Button, Input, Select, LoadingState, ErrorState, Pagination } from '../../components/ui'
-import { confirm, notifySuccess, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -506,16 +509,16 @@ const handleCreate = async () => {
     if (response.data.success) {
       await fetchPrizes()
       closeCreateModal()
-      await notifySuccess('اطلاعات با موفقیت ثبت شد')
+      showToast('اطلاعات با موفقیت ثبت شد', 'success')
     } else {
-      await notifyError(response.data.message || 'خطا در ثبت اطلاعات')
+      showToast(response.data.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Create prize error:', err)
     if (err.response?.data?.errors) {
       errors.value = err.response.data.errors
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } finally {
     saving.value = false
@@ -542,16 +545,16 @@ const handleUpdate = async () => {
     if (response.data.success) {
       await fetchPrizes()
       closeEditModal()
-      await notifySuccess('اطلاعات با موفقیت ثبت شد')
+      showToast('اطلاعات با موفقیت ثبت شد', 'success')
     } else {
-      await notifyError(response.data.message || 'خطا در به‌روزرسانی اطلاعات')
+      showToast(response.data.message || 'خطا در به‌روزرسانی اطلاعات', 'error')
     }
   } catch (err) {
     console.error('Update prize error:', err)
     if (err.response?.data?.errors) {
       errors.value = err.response.data.errors
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در به‌روزرسانی اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در به‌روزرسانی اطلاعات', 'error')
     }
   } finally {
     updating.value = false
@@ -577,13 +580,13 @@ const handleDelete = async (prize) => {
 
     if (response.data.success) {
       await fetchPrizes()
-      await notifySuccess('پاداش با موفقیت حذف شد')
+      showToast('پاداش با موفقیت حذف شد', 'success')
     } else {
-      await notifyError(response.data.message || 'خطا در حذف پاداش')
+      showToast(response.data.message || 'خطا در حذف پاداش', 'error')
     }
   } catch (err) {
     console.error('Delete prize error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف پاداش')
+    showToast(err.response?.data?.message || 'خطا در حذف پاداش', 'error')
   }
 }
 

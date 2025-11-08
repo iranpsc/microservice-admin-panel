@@ -233,7 +233,9 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import apiClient from '../../utils/api'
 import { Button, LoadingState, ErrorState, Table, Pagination, Modal, Input, Select } from '../../components/ui'
 import VerificationForm from '../../components/VerificationForm.vue'
-import { notifySuccess, notifyError } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const error = ref(null)
@@ -402,7 +404,7 @@ const fetchVariables = async () => {
     }
   } catch (err) {
     console.error('Error fetching variables:', err)
-    await notifyError('خطا در بارگذاری لیست ارزها')
+    showToast('خطا در بارگذاری لیست ارزها', 'error')
   } finally {
     loadingVariables.value = false
   }
@@ -462,12 +464,12 @@ const sendVerificationCode = async () => {
       showVerificationDialog.value = true
       return true
     } else {
-      await notifyError('خطا در ارسال کد تایید')
+      showToast('خطا در ارسال کد تایید', 'error')
       return false
     }
   } catch (err) {
     console.error('Verification SMS send error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در ارسال کد تایید')
+    showToast(err.response?.data?.message || 'خطا در ارسال کد تایید', 'error')
     return false
   } finally {
     saving.value = false
@@ -513,7 +515,7 @@ const submitForm = async (verificationData = {}) => {
     }
 
     if (response.data.success) {
-      await notifySuccess(response.data.message)
+      showToast(response.data.message, 'success')
       showVerificationDialog.value = false
 
       // Reset verification form errors on success
@@ -544,7 +546,7 @@ const submitForm = async (verificationData = {}) => {
         verificationFormRef.value.setErrors(validationErrors)
       }
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت اطلاعات')
+      showToast(err.response?.data?.message || 'خطا در ثبت اطلاعات', 'error')
     }
   } finally {
     saving.value = false
@@ -574,7 +576,7 @@ const handleAutoVerifyAndSubmit = async (verificationData) => {
   }
 
   if (!verificationFormRef.value) {
-    await notifyError('خطا در تایید')
+    showToast('خطا در تایید', 'error')
     return
   }
 
@@ -687,12 +689,12 @@ const handleDelete = async (option) => {
     const response = await apiClient.delete(`/options/${option.id}`)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message)
+      showToast(response.data.message, 'success')
       await fetchOptions()
     }
   } catch (err) {
     console.error('Delete error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف پکیج')
+    showToast(err.response?.data?.message || 'خطا در حذف پکیج', 'error')
   }
 }
 

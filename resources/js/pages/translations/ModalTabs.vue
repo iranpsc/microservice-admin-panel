@@ -192,7 +192,10 @@ import LoadingState from '../../components/ui/LoadingState.vue'
 import ErrorState from '../../components/ui/ErrorState.vue'
 import { translationApi } from '../../api/translations'
 import { usePageTitle } from '../../composables/usePageTitle'
-import { confirm, notifyError, notifySuccess } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -290,7 +293,7 @@ const handleCreate = async () => {
     await translationApi.createTab(translationId, modalId, {
       name: createForm.name.trim()
     })
-    notifySuccess('تب جدید برای تمامی زبان‌ها ثبت شد.')
+    showToast('تب جدید برای تمامی زبان‌ها ثبت شد.', 'success')
     showCreateModal.value = false
     resetCreateForm()
     await fetchTabs(page.value)
@@ -324,7 +327,7 @@ const handleUpdate = async () => {
     tabs.value = tabs.value.map((item) =>
       item.id === activeTabId.value ? updatedTab : item
     )
-    notifySuccess('نام تب در تمامی زبان‌ها بروزرسانی گردید.')
+    showToast('نام تب در تمامی زبان‌ها بروزرسانی گردید.', 'success')
     showEditModal.value = false
     resetEditForm()
   } catch (err) {
@@ -344,10 +347,10 @@ const handleDelete = async (tab) => {
 
   try {
     await translationApi.deleteTab(translationId, modalId, tab.id)
-    notifySuccess('تب و تمامی نگاشت‌های زبان حذف گردید.')
+    showToast('تب و تمامی نگاشت‌های زبان حذف گردید.', 'success')
     await fetchTabs(page.value)
   } catch (err) {
-    notifyError(err?.response?.data?.message || 'حذف تب امکان‌پذیر نبود.')
+    showToast(err?.response?.data?.message || 'حذف تب امکان‌پذیر نبود.', 'error')
   }
 }
 

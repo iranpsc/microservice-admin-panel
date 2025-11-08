@@ -365,7 +365,10 @@ import {
   TimePicker
 } from '../../components/ui'
 import PersianDatePicker from '../../components/ui/PersianDatePicker.vue'
-import { notifySuccess, notifyError, confirm as confirmDialog } from '../../utils/notifications'
+import { useToast } from '../../composables/useToast'
+import { confirm as confirmDialog } from '../../utils/notifications'
+
+const { showToast } = useToast()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -617,12 +620,12 @@ const handleCreateSubmit = async () => {
     })
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'وقعه با موفقیت ثبت شد')
+      showToast(response.data.message || 'وقعه با موفقیت ثبت شد', 'success')
       handleCreateModalClose()
       currentPage.value = 1
       fetchEvents()
     } else {
-      await notifyError(response.data.message || 'خطا در ثبت وقعه')
+      showToast(response.data.message || 'خطا در ثبت وقعه', 'error')
     }
   } catch (err) {
     console.error('Calendar create error:', err)
@@ -630,7 +633,7 @@ const handleCreateSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       assignValidationErrors(createErrors, err.response.data.errors)
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در ثبت وقعه')
+      showToast(err.response?.data?.message || 'خطا در ثبت وقعه', 'error')
     }
   } finally {
     saving.value = false
@@ -725,11 +728,11 @@ const handleEditSubmit = async () => {
     })
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'وقعه با موفقیت بروزرسانی شد')
+      showToast(response.data.message || 'وقعه با موفقیت بروزرسانی شد', 'success')
       handleEditModalClose()
       fetchEvents()
     } else {
-      await notifyError(response.data.message || 'خطا در بروزرسانی وقعه')
+      showToast(response.data.message || 'خطا در بروزرسانی وقعه', 'error')
     }
   } catch (err) {
     console.error('Calendar update error:', err)
@@ -737,7 +740,7 @@ const handleEditSubmit = async () => {
     if (err.response?.status === 422 && err.response?.data?.errors) {
       assignValidationErrors(editErrors, err.response.data.errors)
     } else {
-      await notifyError(err.response?.data?.message || 'خطا در بروزرسانی وقعه')
+      showToast(err.response?.data?.message || 'خطا در بروزرسانی وقعه', 'error')
     }
   } finally {
     updating.value = false
@@ -762,7 +765,7 @@ const handleDelete = async (event) => {
     const response = await apiClient.delete(`/calendars/${event.id}`)
 
     if (response.data.success) {
-      await notifySuccess(response.data.message || 'وقعه با موفقیت حذف شد')
+      showToast(response.data.message || 'وقعه با موفقیت حذف شد', 'success')
 
       // If current page becomes empty after deletion, go to previous page
       if (events.value.length === 1 && currentPage.value > 1) {
@@ -771,11 +774,11 @@ const handleDelete = async (event) => {
 
       fetchEvents()
     } else {
-      await notifyError(response.data.message || 'خطا در حذف وقعه')
+      showToast(response.data.message || 'خطا در حذف وقعه', 'error')
     }
   } catch (err) {
     console.error('Calendar delete error:', err)
-    await notifyError(err.response?.data?.message || 'خطا در حذف وقعه')
+    showToast(err.response?.data?.message || 'خطا در حذف وقعه', 'error')
   }
 }
 
