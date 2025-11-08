@@ -19,3 +19,4 @@ admin-laravel-worker.conf
 admin-worker.log
 public/uploads
 /.cursor
+.htaccess
