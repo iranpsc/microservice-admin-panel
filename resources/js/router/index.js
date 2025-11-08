@@ -54,6 +54,7 @@ import TabFields from '../pages/translations/TabFields.vue'
 import NotFound from '../components/errors/NotFound.vue'
 import { navigationProgress } from '../composables/useNavigationProgress'
 import { useAuth } from '../composables/useAuth'
+import IsicCodes from '../pages/isic-codes/Listing.vue'
 
 const routes = [
   {
@@ -452,6 +453,14 @@ const routes = [
         component: TranslationsIndex,
         meta: {
           title: 'مدیریت ترجمه‌ها'
+        }
+      },
+      {
+        path: 'isic-codes',
+        name: 'isic-codes',
+        component: IsicCodes,
+        meta: {
+          title: 'کدهای ISIC'
         }
       },
       {

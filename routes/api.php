@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\DynastyPermissionsController;
 use App\Http\Controllers\Api\DynastyPrizesController;
 use App\Http\Controllers\Api\FeatureLimitsController;
 use App\Http\Controllers\Api\FeaturePricingLimitsController;
+use App\Http\Controllers\Api\IsicCodeController;
 use App\Http\Controllers\Api\KycController;
 use App\Http\Controllers\Api\KycVideoTextController;
 use App\Http\Controllers\Api\LandsController;
@@ -268,6 +269,14 @@ Route::middleware(['auth:sanctum', EnsureAdminSanctumAuth::class])->group(functi
     Route::put('/maps/{id}', [MapsController::class, 'update']);
     Route::delete('/maps/{id}', [MapsController::class, 'destroy']);
     Route::post('/maps/{id}/insert-into-database', [MapsController::class, 'insertIntoDatabase']);
+
+    // ISIC Codes routes
+    Route::get('/isic-codes', [IsicCodeController::class, 'index']);
+    Route::post('/isic-codes', [IsicCodeController::class, 'store']);
+    Route::post('/isic-codes/import', [IsicCodeController::class, 'import']);
+    Route::post('/isic-codes/{isicCode}/approve', [IsicCodeController::class, 'approve']);
+    Route::post('/isic-codes/{isicCode}/deny', [IsicCodeController::class, 'deny']);
+    Route::delete('/isic-codes/{isicCode}', [IsicCodeController::class, 'destroy']);
 
     Route::prefix('v1')->group(function () {
         Route::get('/translations/languages', [TranslationController::class, 'languages']);
