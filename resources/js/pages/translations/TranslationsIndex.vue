@@ -1,5 +1,7 @@
 <template>
   <div class="p-6 space-y-6" dir="rtl">
+    <Breadcrumb :items="breadcrumbItems" />
+
     <header class="space-y-2">
       <h1 class="text-3xl font-bold text-[var(--theme-text-primary)]">مدیریت ترجمه‌ها</h1>
       <p class="text-[var(--theme-text-secondary)]">
@@ -142,6 +144,7 @@ import Checkbox from '../../components/ui/Checkbox.vue'
 import Alert from '../../components/ui/Alert.vue'
 import LoadingState from '../../components/ui/LoadingState.vue'
 import ErrorState from '../../components/ui/ErrorState.vue'
+import Breadcrumb from '../../components/ui/Breadcrumb.vue'
 import { usePageTitle } from '../../composables/usePageTitle'
 import { useToast } from '../../composables/useToast'
 import { confirm } from '../../utils/notifications'
@@ -164,6 +167,11 @@ const languagesLoading = ref(false)
 const languagesError = ref('')
 const languages = ref([])
 const selectedLanguageCode = ref('')
+
+const breadcrumbItems = [
+  { label: 'داشبورد', to: { name: 'dashboard' } },
+  { label: 'مدیریت ترجمه‌ها', active: true }
+]
 
 const tableColumns = [
   { key: 'flag', label: 'زبان', headerClass: 'text-right', cellClass: 'text-right' },

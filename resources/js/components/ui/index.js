@@ -21,4 +21,5 @@ export { default as RichTextEditor } from './RichTextEditor.vue'
 export { default as TimePicker } from './TimePicker.vue'
 export { default as Textarea } from './Textarea.vue'
 export { default as Select2 } from './Select2.vue'
+export { default as Breadcrumb } from './Breadcrumb.vue'
 
