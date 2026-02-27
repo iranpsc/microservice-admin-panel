@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 class ReplaceImagesUrlSeeder extends Seeder
 {
-    private const OLD_URL = 'https://admin.rgb.irpsc.com';
+    private const OLD_URL = 'https://api.rgb.irpsc.com';
 
-    private const NEW_URL = 'https://admin.metarang.com';
+    private const NEW_URL = 'https://api.metarang.com';
 
     /**
      * Replace old admin URL with new one in images.url column.
